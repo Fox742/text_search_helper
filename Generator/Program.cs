@@ -136,32 +136,40 @@ namespace Generator
 
         static void Main(string[] args)
         {
-            makeSets();
-            uint stringsGenerated=0;
-            using (FileStream file1 = new FileStream(fileName, FileMode.Append))
+            try
             {
-                using (StreamWriter sw = new StreamWriter(file1))
+                makeSets();
+                uint stringsGenerated = 0;
+                using (FileStream file1 = new FileStream(fileName, FileMode.Append))
                 {
-                    FileInfo FI = new FileInfo(fileName);
-                    do
+                    using (StreamWriter sw = new StreamWriter(file1))
                     {
-                        string newString = makeString();
-                        sw.WriteLine(newString);
-                        stringsGenerated++;
-                        if (stringsGenerated % 10000 == 0)
+                        FileInfo FI = new FileInfo(fileName);
+                        do
                         {
-                            FI.Refresh();
-                            Console.Clear();
-                            Console.WriteLine("Generated {0} from {1} MBytes", MbytesToString( bytesToMBytes( FI.Length)), MbytesToString(fileSize));
+                            string newString = makeString();
+                            sw.WriteLine(newString);
+                            stringsGenerated++;
+                            if (stringsGenerated % 10000 == 0)
+                            {
+                                FI.Refresh();
+                                Console.Clear();
+                                Console.WriteLine("Generated {0} from {1} MBytes", MbytesToString(bytesToMBytes(FI.Length)), MbytesToString(fileSize));
+                            }
                         }
+                        while (bytesToMBytes(FI.Length) < fileSize);
                     }
-                    while (bytesToMBytes(FI.Length) < fileSize);
+
                 }
 
+                Console.Clear();
+                Console.WriteLine("Generated file: {0}", fileName);
             }
-
-            Console.Clear();
-            Console.WriteLine("Generated file {0}", fileName);
+            catch (Exception exc)
+            {
+                Console.WriteLine(string.Concat("Error occured: ", exc.Message));
+            }
+            Console.WriteLine("Press Enter key to quit");
             Console.ReadLine();
         }
     }

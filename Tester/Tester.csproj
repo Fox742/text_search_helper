@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Update="SearchHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TextSearchHelper\TextSearchHelper.csproj" />
   </ItemGroup>
 

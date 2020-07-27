@@ -7,9 +7,10 @@ namespace Tester
     {
         static void Main(string[] args)
         {
-            TSHelper tsh = new TSHelper("Test");
-
+            SimpleSearcher ss = new SimpleSearcher("../Generator/huge_file.txt");
+            ss.findAll("sdfafg");
             Console.WriteLine("Hello World!");
+            Console.ReadLine();
         }
     }
 }

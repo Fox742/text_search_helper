@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextSearchHelper", "TextSearchHelper\TextSearchHelper.csproj", "{BBD092B6-ED15-45E6-92BB-1B3D89ACE81F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tester", "Tester\Tester.csproj", "{18F10046-005F-405C-AA23-A3C8BA0F694E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Generator", "Generator\Generator.csproj", "{F93A908E-28BD-4045-B061-432E2FB39FD5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BBD092B6-ED15-45E6-92BB-1B3D89ACE81F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBD092B6-ED15-45E6-92BB-1B3D89ACE81F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBD092B6-ED15-45E6-92BB-1B3D89ACE81F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBD092B6-ED15-45E6-92BB-1B3D89ACE81F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18F10046-005F-405C-AA23-A3C8BA0F694E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18F10046-005F-405C-AA23-A3C8BA0F694E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18F10046-005F-405C-AA23-A3C8BA0F694E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18F10046-005F-405C-AA23-A3C8BA0F694E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F93A908E-28BD-4045-B061-432E2FB39FD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F93A908E-28BD-4045-B061-432E2FB39FD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F93A908E-28BD-4045-B061-432E2FB39FD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F93A908E-28BD-4045-B061-432E2FB39FD5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

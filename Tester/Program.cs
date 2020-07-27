@@ -1,4 +1,5 @@
 ﻿using System;
+using TextSearchHelper;
 
 namespace Tester
 {
@@ -6,6 +7,8 @@ namespace Tester
     {
         static void Main(string[] args)
         {
+            TSHelper tsh = new TSHelper("Test");
+
             Console.WriteLine("Hello World!");
         }
     }

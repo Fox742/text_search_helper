@@ -8,7 +8,7 @@ namespace Tester
         static void Main(string[] args)
         {
             SimpleSearcher ss = new SimpleSearcher("../Generator/huge_file.txt");
-            ss.findAll("sdfafg");
+            ss.findAll("кошка");
             Console.WriteLine("Hello World!");
             Console.ReadLine();
         }

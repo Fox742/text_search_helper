@@ -10,7 +10,7 @@ namespace Generator
 {
     class Program
     {
-        private static long fileSize = 1000;
+        private static long fileSize = 5000;
         private static string fileName = "huge_file.txt";
         private static string EnglishFileName = "eng_dict.txt";
         private static string RussianFileName = "rus_dict.txt";

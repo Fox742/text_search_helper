@@ -18,7 +18,7 @@ namespace Tester
 
     abstract class SearchHelper
     {
-        private string _path = string.Empty;
+        protected string _path = string.Empty;
         
         public SearchHelper(string path)
         {

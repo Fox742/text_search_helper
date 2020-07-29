@@ -16,18 +16,12 @@ namespace Tester
         public override List<Position> findAll(string whatToFind)
         {
             List<Position> Result = new List<Position>();
-            long str = -1;
-            int letter = -1;
-            bool isFound = false;
-            do
+            Tuple<long,int> [] InternalResult = _helper.findAll(whatToFind,true);
+            
+            for (int i=0;i<InternalResult.Length;i++)
             {
-                isFound = _helper.find(whatToFind, ref str, ref letter, true);
-                if (isFound)
-                {
-                    Result.Add(new Position(str,letter));
-                }
+                Result.Add(new Position(InternalResult[i].Item1, InternalResult[i].Item2));
             }
-            while (isFound);
 
             return Result;
         }

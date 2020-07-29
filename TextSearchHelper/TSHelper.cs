@@ -138,9 +138,9 @@ namespace TextSearchHelper
 
 
 
-        private bool findInternal(string whatToFind, long stringNumber, int letterNumber, bool waitCaching = true)
+        private SubstringPosition[] findInternal(string whatToFind, long stringNumber, int letterNumber, bool waitCaching = true,long entriesNumber=-1)
         {
-            bool result = false;
+            List<SubstringPosition> result = new List<SubstringPosition>();
 
             // Лочим мьютекс
 
@@ -161,7 +161,11 @@ namespace TextSearchHelper
                         if (currentStringNumber < stringNumber)
                             continue;
                         while (stringsNumbers[stringsNumberPtr] < currentStringNumber)
+                        {
                             stringsNumberPtr++;
+                            if (stringsNumberPtr >= stringsNumbers.Length)
+                                return result.ToArray();
+                        }
                         if (stringsNumbers[stringsNumberPtr] == currentStringNumber)
                         {
                             int currentIndex = -1;
@@ -170,6 +174,7 @@ namespace TextSearchHelper
                                 currentIndex = letterNumber;
                             }
                             
+                            /*
                             if ( (currentIndex = current.IndexOf(whatToFind,currentIndex+1))>=0 )
                             {
                                 // Нашли следующее вхождение строки!!!!
@@ -180,6 +185,18 @@ namespace TextSearchHelper
                                 break;
                             }
                             // else - ничего не делаем, не нашли в текущей строке, поэтому надо идти к следующей строке
+                            */
+
+                            while ((currentIndex = current.IndexOf(whatToFind, currentIndex + 1)) >= 0)
+                            {
+                                SubstringPosition newPosition = new SubstringPosition(currentStringNumber, currentIndex);
+                                _searchCache[whatToFind] = newPosition;
+                                result.Add(newPosition);
+                                if ((entriesNumber>=0) && (result.Count==entriesNumber))
+                                {
+                                    return result.ToArray();
+                                }
+                            }
 
                         }
                     }
@@ -189,25 +206,25 @@ namespace TextSearchHelper
 
             // Освобождаем мьютекс
 
-            return result;
+            return result.ToArray();
         }
 
         public bool find(string whatToFind, ref long stringNumber, ref int letterNumber, bool returnPosition = false, bool waitCaching = true)
         {
-            bool Result = findInternal(whatToFind,stringNumber,letterNumber,waitCaching);
+            SubstringPosition [] result = findInternal(whatToFind,stringNumber,letterNumber,waitCaching,1);
 
-            if ((Result)&&(returnPosition))
+            if ((result.Length>0)&&(returnPosition))
             {
                 SubstringPosition sp = _searchCache[whatToFind];
                 stringNumber = sp.Item1;
                 letterNumber = sp.Item2;
             }
-            return Result;
+            return result.Length>0;
         }
 
         public bool find(string whatToFind, bool fromPreviousPosition = false, bool waitCaching = true)
         {
-            bool Result = false;
+            SubstringPosition[] Result;
             long stringNumber = -1;
             int letterNumber = -1;
 
@@ -217,9 +234,25 @@ namespace TextSearchHelper
                 letterNumber = _searchCache[whatToFind].Item2;
             }
 
-            Result = findInternal(whatToFind, stringNumber, letterNumber, waitCaching);
+            Result = findInternal(whatToFind, stringNumber, letterNumber, waitCaching,1);
             
+            return Result.Length>0;
+        }
+
+        public SubstringPosition [] findAll(string whatToFind, bool waitCaching = true)
+        {
+            SubstringPosition[] Result;
+            long stringNumber = -1;
+            int letterNumber = -1;
+
+            Result = findInternal(whatToFind, stringNumber, letterNumber, waitCaching);
+
             return Result;
+        }
+
+        public void resetAllSearch()
+        {
+            _searchCache = new SearchCache();
         }
 
         public bool waitCacheBuilt(uint timeoutMSec = 5000)

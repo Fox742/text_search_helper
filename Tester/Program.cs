@@ -1,5 +1,6 @@
 ﻿using System;
 using TextSearchHelper;
+using System.IO;
 
 namespace Tester
 {
@@ -12,7 +13,10 @@ namespace Tester
             ss.findAll("кошка");
             */
             CachedSearcher cs = new CachedSearcher("../Generator/huge_file.txt");
-
+            StreamWriter sw = File.AppendText("../Generator/huge_file.txt");
+            sw.WriteLine("Ля ля ля жу жу жу я всё время торможу");
+            sw.Flush();
+            sw.Dispose();
             Console.WriteLine("Hello World!");
             Console.ReadLine();
         }

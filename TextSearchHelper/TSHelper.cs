@@ -1,34 +1,75 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace TextSearchHelper
 {
     public class TSHelper
     {
         private FileCache _cache;
-        private string _path;
+        private string _rawPathToFile;
+        private string _folderPath;
+        private string _fileName;
         private long linesCached = 0;
+        private long lastPosition = 0;
+        private FileSystemWatcher watcher;
 
         public TSHelper(string path,bool asyncCacheBuilding = false)
         {
-            _path = path;
-            FileInfo fi = new FileInfo(_path);
+            _rawPathToFile = path;
+            FileInfo fi = new FileInfo(_rawPathToFile);
+            _folderPath = fi.DirectoryName;
+            _fileName = fi.Name;
             _cache = new FileCache(fi.Directory.FullName,fi.Name);
-
             if (asyncCacheBuilding)
             {
-
+                buildCacheAsync();
             }
             else
             {
                 buildCache();
+                initFSWatcher();
+            }
+        }
+
+        private void initFSWatcher()
+        {
+            watcher = new FileSystemWatcher();
+            watcher.Path = _folderPath;
+            watcher.NotifyFilter = NotifyFilters.LastWrite;
+            watcher.Changed += OnChanged;
+            watcher.Created += OnChanged;
+            watcher.Deleted += OnChanged;
+            watcher.Renamed += OnChanged;
+
+            watcher.Filter = _fileName;
+            watcher.EnableRaisingEvents = true;
+        }
+
+        private void OnChanged(object source, FileSystemEventArgs e)
+        {
+            Console.WriteLine("---");
+            using (FileStream fs = new FileStream(_rawPathToFile,FileMode.Open))
+            {
+                using (StreamReader sr = new StreamReader(fs))
+                {
+                    fs.Seek( lastPosition, SeekOrigin.Begin );
+                    while (!sr.EndOfStream)
+                    {
+                        string currentLine = sr.ReadLine();
+                        _cache.cacheLine(linesCached, currentLine);
+                        linesCached++;
+                    }
+                    lastPosition = fs.Length;
+                    _cache.flush();
+                }
             }
         }
 
         private long countLines()
         {
             long Result = 0;
-            using (FileStream file1 = new FileStream(_path, FileMode.Open))
+            using (FileStream file1 = new FileStream(_rawPathToFile, FileMode.Open))
             {
                 using (StreamReader r = new StreamReader(file1))
                 {
@@ -52,13 +93,19 @@ namespace TextSearchHelper
             return Result;
 
         }
-        
+
+        private async void buildCacheAsync()
+        {
+            await Task.Run(() =>  buildCache());
+            initFSWatcher();
+        }
+
         private void buildCache()
         {
             _cache.resetCache();
             long linesAmount = countLines();
             long currentLine = 0;
-            using (FileStream file1 = new FileStream(_path, FileMode.Open))
+            using (FileStream file1 = new FileStream(_rawPathToFile, FileMode.Open))
             {
                 using (StreamReader r = new StreamReader(file1))
                 {
@@ -77,6 +124,7 @@ namespace TextSearchHelper
                         }
                         //-----
                     }
+                    lastPosition = file1.Length;
                 }
             }
             linesCached = linesAmount;
@@ -97,8 +145,14 @@ namespace TextSearchHelper
         {
             return true;
         }
-        
 
-
+        ~TSHelper()
+        {
+            if (watcher != null)
+            {
+                watcher.Changed -= OnChanged;
+                watcher.Dispose();
+            }
+        }
     }
 }

@@ -11,6 +11,8 @@ namespace TextSearchHelper
         private static int _stringNumbersSize = 1000;
         private int _stringNumbersPtr=0;
         private long[] _stringsNumbers;
+        private long lastAddedNumber = 0;
+        private bool wasAdded = false;
 
         public CacheGroup()
         {
@@ -19,9 +21,13 @@ namespace TextSearchHelper
 
         public void AddLine(long newStringNumber)
         {
-
-            _stringsNumbers[_stringNumbersPtr] = newStringNumber;
-            _stringNumbersPtr++;
+            if (!wasAdded || ((wasAdded) && (lastAddedNumber != newStringNumber)))
+            {
+                _stringsNumbers[_stringNumbersPtr] = newStringNumber;
+                _stringNumbersPtr++;
+                lastAddedNumber = newStringNumber;
+                wasAdded = true;
+            }
         }
 
         public bool isFull()
@@ -42,6 +48,27 @@ namespace TextSearchHelper
                 }
             }
             _stringNumbersPtr = 0;
+        }
+
+        public static long[]getStringNumbers( string cacheFilePath )
+        {
+            long[] Result = new long[0];
+
+            using (FileStream fs = new FileStream(cacheFilePath, FileMode.Open))
+            {
+                using (BinaryReader br = new BinaryReader(fs))
+                {
+                    byte[] bytes = new byte[fs.Length];
+                    for (int i = 0; i < fs.Length; i++)
+                        bytes[i] = br.ReadByte();
+
+                    long[] temp = new long[bytes.Length/ sizeof(long) ];
+                    Buffer.BlockCopy(bytes, 0, temp, 0, bytes.Length);
+                    Result = temp;
+                }
+            }
+
+            return Result;
         }
 
     }

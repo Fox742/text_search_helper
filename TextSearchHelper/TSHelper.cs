@@ -1,9 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace TextSearchHelper
 {
+    using SubstringPosition = Tuple<long, int>;
+    using SearchCache = Dictionary<string, Tuple<long, int>>;
+
     public class TSHelper
     {
         private FileCache _cache;
@@ -13,6 +17,7 @@ namespace TextSearchHelper
         private long linesCached = 0;
         private long lastPosition = 0;
         private FileSystemWatcher watcher;
+        private SearchCache _searchCache = new SearchCache();
 
         public TSHelper(string path,bool asyncCacheBuilding = false)
         {
@@ -131,14 +136,90 @@ namespace TextSearchHelper
             _cache.flush();
         }
 
-        public bool find(string whatToFind, ref uint stringNumber, ref uint letterNumber, bool returnPosition = false)
+
+
+        private bool findInternal(string whatToFind, long stringNumber, int letterNumber, bool waitCaching = true)
         {
-            return false;
+            bool result = false;
+
+            // Лочим мьютекс
+
+            // Получим список строк с вхождением первых двух буков
+            long[] stringsNumbers = _cache.getStringNumbers(whatToFind);
+            int stringsNumberPtr = 0;
+            string current;
+            using (FileStream fs = new FileStream(_rawPathToFile, FileMode.Open))
+            {
+                using (StreamReader sr = new StreamReader(fs))
+                {
+                    int currentStringNumber = -1;
+                    
+                    while ( !sr.EndOfStream)
+                    {
+                        currentStringNumber++;
+                        current = sr.ReadLine();
+                        if (currentStringNumber < stringNumber)
+                            continue;
+                        while (stringsNumbers[stringsNumberPtr] < currentStringNumber)
+                            stringsNumberPtr++;
+                        if (stringsNumbers[stringsNumberPtr] == currentStringNumber)
+                        {
+                            int currentIndex = -1;
+                            if (currentStringNumber==stringNumber)
+                            {
+                                currentIndex = letterNumber;
+                            }
+                            
+                            if ( (currentIndex = current.IndexOf(whatToFind,currentIndex+1))>=0 )
+                            {
+                                // Нашли следующее вхождение строки!!!!
+                                result = true;
+                                // Кеширование номера строки и 
+                                _searchCache[whatToFind] = new SubstringPosition(currentStringNumber,currentIndex);
+                                // Выход из цикла поиска
+                                break;
+                            }
+                            // else - ничего не делаем, не нашли в текущей строке, поэтому надо идти к следующей строке
+
+                        }
+                    }
+                }
+            }
+
+
+            // Освобождаем мьютекс
+
+            return result;
         }
 
-        public bool find(string whatToFind, bool fromPreviousPosition = false)
+        public bool find(string whatToFind, ref long stringNumber, ref int letterNumber, bool returnPosition = false, bool waitCaching = true)
         {
-            return false;
+            bool Result = findInternal(whatToFind,stringNumber,letterNumber,waitCaching);
+
+            if ((Result)&&(returnPosition))
+            {
+                SubstringPosition sp = _searchCache[whatToFind];
+                stringNumber = sp.Item1;
+                letterNumber = sp.Item2;
+            }
+            return Result;
+        }
+
+        public bool find(string whatToFind, bool fromPreviousPosition = false, bool waitCaching = true)
+        {
+            bool Result = false;
+            long stringNumber = -1;
+            int letterNumber = -1;
+
+            if (_searchCache.ContainsKey(whatToFind)&&fromPreviousPosition)
+            {
+                stringNumber = _searchCache[whatToFind].Item1;
+                letterNumber = _searchCache[whatToFind].Item2;
+            }
+
+            Result = findInternal(whatToFind, stringNumber, letterNumber, waitCaching);
+            
+            return Result;
         }
 
         public bool waitCacheBuilt(uint timeoutMSec = 5000)

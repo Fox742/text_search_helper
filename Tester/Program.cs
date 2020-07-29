@@ -12,11 +12,19 @@ namespace Tester
             SimpleSearcher ss = new SimpleSearcher("../Generator/huge_file.txt");
             ss.findAll("кошка");
             */
+
+            /*
             CachedSearcher cs = new CachedSearcher("../Generator/huge_file.txt");
             StreamWriter sw = File.AppendText("../Generator/huge_file.txt");
             sw.WriteLine("Ля ля ля жу жу жу я всё время торможу");
             sw.Flush();
             sw.Dispose();
+            */
+
+            //CachedSearcher ss = new CachedSearcher("../Generator/huge_file.txt");
+            SimpleSearcher ss = new SimpleSearcher("../Generator/huge_file.txt");
+            ss.findAll("жу жу жу я всё время торможу");
+
             Console.WriteLine("Hello World!");
             Console.ReadLine();
         }

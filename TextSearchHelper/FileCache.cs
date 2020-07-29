@@ -28,18 +28,11 @@ namespace TextSearchHelper
             cg.AddLine(44444444444);
 
             flush("ts", cg);
-
-            using (FileStream fs = new FileStream("C:\\Projects\\SSharp\\text_search_helper\\Generator\\huge_file_txt_index\\74_73.dat", FileMode.Open))
-            {
-                using (BinaryReader br = new BinaryReader(fs))
-                {
-                    Console.WriteLine(br.ReadInt64());
-                    Console.WriteLine(br.ReadInt64());
-                    Console.WriteLine(br.ReadInt64());
-                    Console.WriteLine(br.ReadInt64());
-                }
-            }
-            */
+            long[] test = CacheGroup.getStringNumbers("C:\\Projects\\SSharp\\text_search_helper\\Generator\\huge_file_txt_index\\74_73.dat");
+            for (int i = 0; i < test.Length; i++)
+                Console.WriteLine(test[i]);
+                */
+            
         }
 
         private void removeIndexFolder()
@@ -96,6 +89,13 @@ namespace TextSearchHelper
                 }
                 chains[onechain].AddLine(lineNumber);
             }
+        }
+
+        public long[] getStringNumbers(string whatToFind)
+        {
+            string code = string.Empty+whatToFind[0] + whatToFind[1];
+            string indexFilePath = _cachePath + "\\" + _cachePathFolder + "\\" + nameToHex(code) + ".dat";
+            return CacheGroup.getStringNumbers(indexFilePath) ; 
         }
 
         ~FileCache()

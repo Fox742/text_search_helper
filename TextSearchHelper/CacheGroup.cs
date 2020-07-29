@@ -58,10 +58,10 @@ namespace TextSearchHelper
             {
                 using (BinaryReader br = new BinaryReader(fs))
                 {
-                    byte[] bytes = new byte[fs.Length];
-                    for (int i = 0; i < fs.Length; i++)
-                        bytes[i] = br.ReadByte();
-                    //byte[] bytes = br.ReadBytes((int)fs.Length); 
+                    //byte[] bytes = new byte[fs.Length];
+                    //for (int i = 0; i < fs.Length; i++)
+                    //    bytes[i] = br.ReadByte();
+                    byte[] bytes = br.ReadBytes((int)fs.Length); 
                     long[] temp = new long[bytes.Length/ sizeof(long) ];
                     Buffer.BlockCopy(bytes, 0, temp, 0, bytes.Length);
                     Result = temp;

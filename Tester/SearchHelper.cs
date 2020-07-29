@@ -14,6 +14,7 @@ namespace Tester
         }
         public readonly long StringNumber;
         public readonly long LetterNumber;
+        
     }
 
     abstract class SearchHelper

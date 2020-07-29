@@ -10,6 +10,7 @@ namespace Generator
 {
     class Program
     {
+        //private static long fileSize = 250;
         private static long fileSize = 1000;
         //private static long fileSize = 5000;
         //private static long fileSize = 1;

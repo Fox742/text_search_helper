@@ -12,6 +12,7 @@ namespace TextSearchHelper
         private Dictionary<string, CacheGroup> chains = new Dictionary<string, CacheGroup>();
         private string _cachePathFolder;
         private string _cachePath;
+        private static string _groupsCatalogCache = "groups";
         public FileCache(string path, string Filename)
         {
             _cachePath = path;
@@ -47,6 +48,8 @@ namespace TextSearchHelper
         private void createIndexFolder()
         {
             Directory.CreateDirectory(_cachePath + "\\" + _cachePathFolder);
+            Directory.CreateDirectory(_cachePath + "\\" + _cachePathFolder+"\\"+_groupsCatalogCache);
+
         }
 
         public void resetCache()
@@ -62,7 +65,7 @@ namespace TextSearchHelper
 
         private void flush(string code, CacheGroup groupToFlush)
         {
-            string indexFilePath = _cachePath + "\\" + _cachePathFolder + "\\" + nameToHex(code) + ".dat";
+            string indexFilePath = _cachePath + "\\" + _cachePathFolder + "\\" + _groupsCatalogCache +"\\" + nameToHex(code) + ".dat";
             groupToFlush.flush(indexFilePath);
         }
 
@@ -93,8 +96,8 @@ namespace TextSearchHelper
 
         public long[] getStringNumbers(string whatToFind)
         {
-            string code = string.Empty+whatToFind[0] + whatToFind[1];
-            string indexFilePath = _cachePath + "\\" + _cachePathFolder + "\\" + nameToHex(code) + ".dat";
+            string code = string.Empty + whatToFind[0] + whatToFind[1];
+            string indexFilePath = _cachePath + "\\" + _cachePathFolder + "\\" + _groupsCatalogCache + "\\"+ nameToHex(code) + ".dat";
             return CacheGroup.getStringNumbers(indexFilePath) ; 
         }
 

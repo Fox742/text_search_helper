@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Text;
 
 namespace TextSearchHelper
 {
@@ -53,6 +54,8 @@ namespace TextSearchHelper
 
         private void OnChanged(object source, FileSystemEventArgs e)
         {
+            long oldPosition = lastPosition;
+
             Console.WriteLine("---");
             using (FileStream fs = new FileStream(_rawPathToFile,FileMode.Open))
             {
@@ -69,6 +72,32 @@ namespace TextSearchHelper
                     _cache.flush();
                 }
             }
+
+            long currentPosition = oldPosition;
+            List<long>stringPositions = new List<long>();
+            using (FileStream file1 = new FileStream(_rawPathToFile, FileMode.Open))
+            {
+                using (StreamReader r = new StreamReader(file1))
+                {
+                    file1.Seek(oldPosition,SeekOrigin.Begin);
+                    string line;
+                    while ((line = r.ReadLine()) != null)
+                    {
+                        long currentStringLength = 0;
+                        if (line.Length > 0)
+                        {
+                            // Сохранение позиции
+                            stringPositions.Add(currentPosition);
+
+                            currentStringLength = r.CurrentEncoding.GetByteCount(line) + r.CurrentEncoding.GetByteCount("\r\n");
+                            currentPosition += currentStringLength;
+                        }
+
+                    }
+                }
+            }
+            _cache.storeLinesDictionary(stringPositions.ToArray());
+
         }
 
         private long countLines()
@@ -117,7 +146,7 @@ namespace TextSearchHelper
                     string line;
                     while ((line = r.ReadLine()) != null)
                     {
-                        _cache.cacheLine(currentLine,line);
+                        _cache.cacheLine(currentLine, line);
                         currentLine++;
                         //-----
                         if (currentLine % 100000 == 0)
@@ -134,9 +163,55 @@ namespace TextSearchHelper
             }
             linesCached = linesAmount;
             _cache.flush();
+            buildLinesBeginnings(linesAmount);
         }
 
+        private void buildLinesBeginnings(long linesAmount)
+        {
+            long currentPosition = 0;
+            long linesCount = 0;
+            long[] stringPositions = new long[linesAmount];
+            using (FileStream file1 = new FileStream(_rawPathToFile, FileMode.Open))
+            {
+                using (StreamReader r = new StreamReader(file1))
+                {
+                    string line;
+                    while ((line = r.ReadLine()) != null)
+                    {
+                        long currentStringLength = 0;
+                        if (line.Length>0)
+                        {
+                            // Сохранение позиции
+                            stringPositions[linesCount] = currentPosition;
 
+                            currentStringLength = r.CurrentEncoding.GetByteCount(line)+ r.CurrentEncoding.GetByteCount("\r\n");
+                            currentPosition += currentStringLength;
+                            linesCount++;
+                        }
+
+                    }
+                }
+            }
+            _cache.storeLinesDictionary(stringPositions);
+
+            /*
+            //-----
+            using (FileStream file1 = new FileStream(_rawPathToFile, FileMode.Open))
+            {
+                using (StreamReader r = new StreamReader(file1))
+                {
+                    file1.Seek(146, SeekOrigin.Begin);
+                    string line = r.ReadLine();
+
+                    file1.Seek(352, SeekOrigin.Begin);
+                    line = r.ReadLine();
+
+                }
+            }
+                    //-----
+                    */
+
+        }
 
         private SubstringPosition[] findInternal(string whatToFind, long stringNumber, int letterNumber, bool waitCaching = true,long entriesNumber=-1)
         {

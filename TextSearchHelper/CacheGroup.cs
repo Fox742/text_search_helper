@@ -37,38 +37,13 @@ namespace TextSearchHelper
 
         public void flush(string fileToFlush)
         {
-            byte[] bytes = new byte[_stringNumbersPtr * sizeof(long)];
-            Buffer.BlockCopy(_stringsNumbers, 0, bytes, 0, _stringNumbersPtr * sizeof(long));
-
-            using (FileStream fs = new FileStream(fileToFlush, FileMode.Append))
-            {
-                using (BinaryWriter bw = new BinaryWriter(fs))
-                {
-                    bw.Write(bytes, 0, bytes.Length);
-                }
-            }
+            Utils.longArrayToFile(fileToFlush, _stringsNumbers, _stringNumbersPtr);
             _stringNumbersPtr = 0;
         }
 
         public static long[]getStringNumbers( string cacheFilePath )
         {
-            long[] Result = new long[0];
-
-            using (FileStream fs = new FileStream(cacheFilePath, FileMode.Open))
-            {
-                using (BinaryReader br = new BinaryReader(fs))
-                {
-                    //byte[] bytes = new byte[fs.Length];
-                    //for (int i = 0; i < fs.Length; i++)
-                    //    bytes[i] = br.ReadByte();
-                    byte[] bytes = br.ReadBytes((int)fs.Length); 
-                    long[] temp = new long[bytes.Length/ sizeof(long) ];
-                    Buffer.BlockCopy(bytes, 0, temp, 0, bytes.Length);
-                    Result = temp;
-                }
-            }
-
-            return Result;
+            return Utils.longArrayFromFile(cacheFilePath);
         }
 
     }

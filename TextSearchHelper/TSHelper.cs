@@ -19,6 +19,8 @@ namespace TextSearchHelper
         private long lastPosition = 0;
         private FileSystemWatcher watcher;
         private SearchCache _searchCache = new SearchCache();
+        private bool inited = false;
+
 
         public TSHelper(string path,bool asyncCacheBuilding = false)
         {
@@ -35,6 +37,7 @@ namespace TextSearchHelper
             {
                 buildCache();
                 initFSWatcher();
+                inited = true;
             }
         }
 
@@ -54,7 +57,7 @@ namespace TextSearchHelper
 
         private void OnChanged(object source, FileSystemEventArgs e)
         {
-            Console.WriteLine("---");
+            //Console.WriteLine("---");
             using (FileStream fs = new FileStream(_rawPathToFile,FileMode.Open))
             {
                 using (StreamReader sr = new StreamReader(fs))
@@ -84,7 +87,7 @@ namespace TextSearchHelper
                     while ((line = r.ReadLine()) != null)
                     {
                         Result++;
-                        
+                        /*
                         //----
                         if (Result % 100000 == 0)
                         {
@@ -93,7 +96,7 @@ namespace TextSearchHelper
                             Console.WriteLine("Lines amount: {0}", Result);
                         }
                         //----
-                        
+                        */
                     }
                 }
             }
@@ -105,6 +108,17 @@ namespace TextSearchHelper
         {
             await Task.Run(() =>  buildCache());
             initFSWatcher();
+            inited = true;
+        }
+
+        private bool _waitInitedInternal( bool wait = false )
+        {
+            while (!inited)
+            {
+                if (!wait)
+                    return false;
+            }
+            return true;
         }
 
         private void buildCache()
@@ -121,6 +135,7 @@ namespace TextSearchHelper
                     {
                         _cache.cacheLine(currentLine, line);
                         currentLine++;
+                        /*
                         //-----
                         if (currentLine % 100000 == 0)
                         {
@@ -130,6 +145,7 @@ namespace TextSearchHelper
                             Console.WriteLine("Lines total: {0}", linesAmount);
                         }
                         //-----
+                        */
                     }
                     lastPosition = file1.Length;
                 }
@@ -142,7 +158,10 @@ namespace TextSearchHelper
         {
             List<SubstringPosition> result = new List<SubstringPosition>();
 
-            // Лочим мьютекс
+            
+            bool cacheReady = _waitInitedInternal(waitCaching);
+            if (!cacheReady)
+                throw new WaitCacheException();
 
             // Получим список строк с вхождением первых двух буков
             long[] stringsNumbers = _cache.getStringNumbers(whatToFind);
@@ -173,19 +192,6 @@ namespace TextSearchHelper
                             {
                                 currentIndex = letterNumber;
                             }
-                            
-                            /*
-                            if ( (currentIndex = current.IndexOf(whatToFind,currentIndex+1))>=0 )
-                            {
-                                // Нашли следующее вхождение строки!!!!
-                                result = true;
-                                // Кеширование номера строки и 
-                                _searchCache[whatToFind] = new SubstringPosition(currentStringNumber,currentIndex);
-                                // Выход из цикла поиска
-                                break;
-                            }
-                            // else - ничего не делаем, не нашли в текущей строке, поэтому надо идти к следующей строке
-                            */
 
                             while ((currentIndex = current.IndexOf(whatToFind, currentIndex + 1)) >= 0)
                             {
@@ -204,7 +210,7 @@ namespace TextSearchHelper
             }
 
 
-            // Освобождаем мьютекс
+
 
             return result.ToArray();
         }

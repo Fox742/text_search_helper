@@ -50,6 +50,6 @@ namespace Tester
 
         }
 
-        public abstract List<Position> findAll(string whatToFind);
+        public abstract List<Position> findAll(string whatToFind, bool waitCache = true);
     }
 }

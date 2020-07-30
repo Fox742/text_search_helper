@@ -49,6 +49,8 @@ namespace Tester
             SimpleSearcher ss = new SimpleSearcher("../Generator/huge_file.txt");
             ss.findAll("жу жу жу я всё время торможу");
             */
+
+            /*
             Timer _timer = new Timer();
 
             SimpleSearcher ss = new SimpleSearcher("../Generator/huge_file.txt");
@@ -63,7 +65,14 @@ namespace Tester
             double CcTime = _timer.getInterval();
 
             Console.WriteLine("Positions of both search method eqials or not?"+( isEqual(positionsCached,positionsStandars)?" ":" NOT "  )+"equals");
-            
+            */
+
+            Timer _timer = new Timer();
+            _timer.reset();
+            CachedSearcher sc = new CachedSearcher("../Generator/huge_file.txt", true);
+            Console.WriteLine("Created CachedSearcher -> Calling findAll");
+            List<Position> positionsCached = sc.findAll("кошка", true);
+            Console.WriteLine("Waiting of cache building took: {0}",_timer.getInterval());
             Console.WriteLine("Hello World!");
             Console.ReadLine();
         }

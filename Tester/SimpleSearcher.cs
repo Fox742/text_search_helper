@@ -25,7 +25,7 @@ namespace Tester
             return Result;
         }
 
-        public override List<Position>findAll(string whatToFind)
+        public override List<Position>findAll(string whatToFind, bool waitCache = true)
         {
             List<Position> Result = new List<Position>();
             long LinesAmount = countLines();

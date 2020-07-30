@@ -69,11 +69,6 @@ namespace TextSearchHelper
             groupToFlush.flush(indexFilePath);
         }
 
-        public void storeLinesDictionary(long [] array_dictionary)
-        {
-            Utils.longArrayToFile(_cachePath + "\\" + _cachePathFolder+"\\lines_begin_cache.dat", array_dictionary);
-        }
-
         public void flush()
         {
             foreach(string oneKey in chains.Keys)

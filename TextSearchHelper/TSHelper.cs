@@ -170,7 +170,7 @@ namespace TextSearchHelper
                         if (currentLine % 100000 == 0)
                         {
                             _logger.Clear();
-                            _logger.WriteLine("Caching...");
+                            _logger.WriteLine("Cach building...");
                             _logger.WriteLine(string.Format("Lines amount: {0}", currentLine));
                             _logger.WriteLine(string.Format("Lines total: {0}", linesAmount));
                         }
@@ -200,7 +200,8 @@ namespace TextSearchHelper
                 using (StreamReader sr = new StreamReader(fs))
                 {
                     int currentStringNumber = -1;
-                    
+                    _logger.Clear();
+                    _logger.WriteLine("Cache searching process...");
                     while ( !sr.EndOfStream)
                     {
                         currentStringNumber++;
@@ -322,11 +323,5 @@ namespace TextSearchHelper
             }
         }
 
-        /*
-        ~TSHelper()
-        {
-            Dispose();
-        }
-        */
     }
 }

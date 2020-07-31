@@ -11,7 +11,8 @@
 *using (TSHelper _helper = new TSHelper("some_file.txt"))*  
 *{*  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*Tuple<long, int>[] InternalResult = _helper.findAll(whatToFind);*    
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*// Массив InternalResult - содержит результат поиска в виде пар, где Item1 - номер строки, а Item2 - номер*     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*//  символа начала вхождения искомой строки whatToFind*  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*// Массив InternalResult - содержит результат поиска в виде пар, где Item1 - номер строки, а Item2 - номер*     
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*//  символа начала вхождения искомой строки whatToFind*  
 *}*  
 
 Построение индекса-кеша может выполняться синхронно в конструкторе или асинхронно в фоновом процессе. Данная возможность управляется путём спейиального флага конструктора класса TSHelper. При асинхронном пострении инлекса-кеша в функциях find/findAll можно задать необходимо ли ждать завершение поятроения кеша или выбросить исключение WaitCacheException.

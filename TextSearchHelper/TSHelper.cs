@@ -9,7 +9,7 @@ namespace TextSearchHelper
     using SubstringPosition = Tuple<long, int>;
     using SearchCache = Dictionary<string, Tuple<long, int>>;
 
-    public class TSHelper
+    public class TSHelper: IDisposable
     {
         private FileCache _cache;
         private string _rawPathToFile;
@@ -20,10 +20,20 @@ namespace TextSearchHelper
         private FileSystemWatcher watcher;
         private SearchCache _searchCache = new SearchCache();
         private bool inited = false;
+        private bool isDisposed = false;
+        private TSHelperLogger _logger;
 
 
-        public TSHelper(string path,bool asyncCacheBuilding = false)
+        public TSHelper(string path,bool asyncCacheBuilding = false, TSHelperLogger logger = null)
         {
+            if (logger==null)
+            {
+                _logger = new TSHelperLogger();
+            }
+            else
+            {
+                _logger = logger;
+            }
             _rawPathToFile = path;
             FileInfo fi = new FileInfo(_rawPathToFile);
             _folderPath = fi.DirectoryName;
@@ -41,24 +51,35 @@ namespace TextSearchHelper
             }
         }
 
+        private void checkDisposed()
+        {
+            if (isDisposed)
+                throw new TextSearchDisposed();
+        }
+
         private void initFSWatcher()
         {
             watcher = new FileSystemWatcher();
             watcher.Path = _folderPath;
-            watcher.NotifyFilter = NotifyFilters.LastWrite;
+            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.DirectoryName | NotifyFilters.FileName;
             watcher.Changed += OnChanged;
             watcher.Created += OnChanged;
-            watcher.Deleted += OnChanged;
-            watcher.Renamed += OnChanged;
+            watcher.Deleted += OnRenameDelete;
+            watcher.Renamed += OnRenameDelete;
 
             watcher.Filter = _fileName;
             watcher.EnableRaisingEvents = true;
         }
 
+        private void OnRenameDelete(object source, FileSystemEventArgs e)
+        {
+            Dispose();
+        }
+
         private void OnChanged(object source, FileSystemEventArgs e)
         {
             //Console.WriteLine("---");
-            using (FileStream fs = new FileStream(_rawPathToFile,FileMode.Open))
+            using (FileStream fs = new FileStream(_rawPathToFile,FileMode.Open, FileAccess.Read))
             {
                 using (StreamReader sr = new StreamReader(fs))
                 {
@@ -87,16 +108,12 @@ namespace TextSearchHelper
                     while ((line = r.ReadLine()) != null)
                     {
                         Result++;
-                        /*
-                        //----
                         if (Result % 100000 == 0)
                         {
-                            Console.Clear();
-                            Console.WriteLine("Lines counting...");
-                            Console.WriteLine("Lines amount: {0}", Result);
+                            _logger.Clear();
+                            _logger.WriteLine("Lines counting...");
+                            _logger.WriteLine(string.Format("Lines amount: {0}", Result));
                         }
-                        //----
-                        */
                     }
                 }
             }
@@ -135,17 +152,14 @@ namespace TextSearchHelper
                     {
                         _cache.cacheLine(currentLine, line);
                         currentLine++;
-                        /*
-                        //-----
+
                         if (currentLine % 100000 == 0)
                         {
-                            Console.Clear();
-                            Console.WriteLine("Caching...");
-                            Console.WriteLine("Lines amount: {0}", currentLine);
-                            Console.WriteLine("Lines total: {0}", linesAmount);
+                            _logger.Clear();
+                            _logger.WriteLine("Caching...");
+                            _logger.WriteLine(string.Format("Lines amount: {0}", currentLine));
+                            _logger.WriteLine(string.Format("Lines total: {0}", linesAmount));
                         }
-                        //-----
-                        */
                     }
                     lastPosition = file1.Length;
                 }
@@ -167,7 +181,7 @@ namespace TextSearchHelper
             long[] stringsNumbers = _cache.getStringNumbers(whatToFind);
             int stringsNumberPtr = 0;
             string current;
-            using (FileStream fs = new FileStream(_rawPathToFile, FileMode.Open))
+            using (FileStream fs = new FileStream(_rawPathToFile, FileMode.Open,FileAccess.Read))
             {
                 using (StreamReader sr = new StreamReader(fs))
                 {
@@ -208,15 +222,12 @@ namespace TextSearchHelper
                     }
                 }
             }
-
-
-
-
             return result.ToArray();
         }
 
         public bool find(string whatToFind, ref long stringNumber, ref int letterNumber, bool returnPosition = false, bool waitCaching = true)
         {
+            checkDisposed();
             SubstringPosition [] result = findInternal(whatToFind,stringNumber,letterNumber,waitCaching,1);
 
             if ((result.Length>0)&&(returnPosition))
@@ -230,6 +241,7 @@ namespace TextSearchHelper
 
         public bool find(string whatToFind, bool fromPreviousPosition = false, bool waitCaching = true)
         {
+            checkDisposed();
             SubstringPosition[] Result;
             long stringNumber = -1;
             int letterNumber = -1;
@@ -247,6 +259,7 @@ namespace TextSearchHelper
 
         public SubstringPosition [] findAll(string whatToFind, bool waitCaching = true)
         {
+            checkDisposed();
             SubstringPosition[] Result;
             long stringNumber = -1;
             int letterNumber = -1;
@@ -258,21 +271,42 @@ namespace TextSearchHelper
 
         public void resetAllSearch()
         {
+            checkDisposed();
             _searchCache = new SearchCache();
         }
 
         public bool waitCacheBuilt(uint timeoutMSec = 5000)
         {
+            checkDisposed();
             return true;
         }
 
-        ~TSHelper()
+        public void Dispose()
         {
-            if (watcher != null)
+            if (!isDisposed)
             {
-                watcher.Changed -= OnChanged;
-                watcher.Dispose();
+                isDisposed = true;
+                if (watcher != null)
+                {
+                    watcher.Changed -= OnChanged;
+                    watcher.Created -= OnChanged;
+                    watcher.Deleted -= OnRenameDelete;
+                    watcher.Renamed -= OnRenameDelete;
+                    watcher.Dispose();
+                }
+                if (_cache!=null)
+                {
+                    _cache.Dispose();
+                }
+
             }
         }
+
+        /*
+        ~TSHelper()
+        {
+            Dispose();
+        }
+        */
     }
 }

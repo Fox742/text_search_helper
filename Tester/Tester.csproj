@@ -6,10 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="SearchHelper.cs" />
+    <Compile Update="BaseSearchHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GeneratorLib\GeneratorLib.csproj" />
     <ProjectReference Include="..\TextSearchHelper\TextSearchHelper.csproj" />
   </ItemGroup>
 

@@ -5,7 +5,7 @@ using System.IO;
 
 namespace TextSearchHelper
 {
-    internal class FileCache
+    internal class FileCache: IDisposable
     {
         //private Dictionary<string, long[]> chains = new Dictionary<string, long[]>();
         //private Dictionary<string, int> chainsPtr = new Dictionary<string, int>();
@@ -101,7 +101,7 @@ namespace TextSearchHelper
             return CacheGroup.getStringNumbers(indexFilePath) ; 
         }
 
-        ~FileCache()
+        public void Dispose()
         {
             removeIndexFolder();
         }

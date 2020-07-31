@@ -7,9 +7,9 @@
 
 *using TextSearchHelper;*  
 *...*  
-*File("some_file.txt").WriteAllText(Оооочень большая строка);* 
+*File("some_file.txt").WriteAllText(Оооочень большая строка);*  
 *using (TSHelper _helper = new TSHelper("some_file.txt"))*  
 *{*  
-*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tuple<long, int>[] InternalResult = _helper.findAll(whatToFind);*  
+*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tuple<long, int>[] InternalResult = _helper.findAll(whatToFind);*    
 *&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Массив InternalResult - содержит результат поиска в виде пар, где Item1 - номер строки, а Item2 - номер символа начала вхождения искомой *строки whatToFind*  
 *}*  

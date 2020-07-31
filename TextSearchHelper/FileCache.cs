@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using System.Threading;
 
 namespace TextSearchHelper
 {
@@ -77,10 +78,12 @@ namespace TextSearchHelper
             }
         }
 
-        public void cacheLine(long lineNumber,string targetLine)
+        public void cacheLine(long lineNumber,string targetLine, CancellationTokenSource buildCacheCancel=null)
         {
             for (int i =0;i<targetLine.Length-1;i++)
             {
+                if ((buildCacheCancel!=null) && (buildCacheCancel.Token.IsCancellationRequested))
+                    return;
                 string onechain = targetLine.Substring(i,2);
                 if (!chains.ContainsKey(onechain))
                 {

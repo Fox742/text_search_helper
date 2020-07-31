@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text;
@@ -20,8 +21,10 @@ namespace TextSearchHelper
         private FileSystemWatcher watcher;
         private SearchCache _searchCache = new SearchCache();
         private bool inited = false;
+        private bool cacheBuildCancelled = false;
         private bool isDisposed = false;
         private TSHelperLogger _logger;
+        private CancellationTokenSource buildCacheCancel = new CancellationTokenSource();
 
 
         public TSHelper(string path,bool asyncCacheBuilding = false, TSHelperLogger logger = null)
@@ -87,7 +90,9 @@ namespace TextSearchHelper
                     while (!sr.EndOfStream)
                     {
                         string currentLine = sr.ReadLine();
-                        _cache.cacheLine(linesCached, currentLine);
+                        _cache.cacheLine(linesCached, currentLine, buildCacheCancel);
+                        if (buildCacheCancel.Token.IsCancellationRequested)
+                            return;
                         linesCached++;
                     }
                     lastPosition = fs.Length;
@@ -124,8 +129,12 @@ namespace TextSearchHelper
         private async void buildCacheAsync()
         {
             await Task.Run(() =>  buildCache());
-            initFSWatcher();
-            inited = true;
+            if (!cacheBuildCancelled)
+            {
+                initFSWatcher();
+                inited = true;
+            }
+
         }
 
         private bool _waitInitedInternal( bool wait = false )
@@ -150,7 +159,12 @@ namespace TextSearchHelper
                     string line;
                     while ((line = r.ReadLine()) != null)
                     {
-                        _cache.cacheLine(currentLine, line);
+                        _cache.cacheLine(currentLine, line,buildCacheCancel);
+                        if (buildCacheCancel.Token.IsCancellationRequested)
+                        {
+                            cacheBuildCancelled = true;
+                            return;
+                        }
                         currentLine++;
 
                         if (currentLine % 100000 == 0)
@@ -275,10 +289,9 @@ namespace TextSearchHelper
             _searchCache = new SearchCache();
         }
 
-        public bool waitCacheBuilt(uint timeoutMSec = 5000)
+        public bool waitCacheBuilt()
         {
-            checkDisposed();
-            return true;
+            return _waitInitedInternal(true);
         }
 
         public void Dispose()
@@ -286,6 +299,13 @@ namespace TextSearchHelper
             if (!isDisposed)
             {
                 isDisposed = true;
+                
+                if (!inited)
+                {
+                    buildCacheCancel.Cancel();
+                    while (!cacheBuildCancelled){}
+                }
+
                 if (watcher != null)
                 {
                     watcher.Changed -= OnChanged;

@@ -29,6 +29,11 @@ namespace Tester
             return Result;
         }
 
+        public bool waitCacheBuilt()
+        {
+            return _helper.waitCacheBuilt();
+        }
+
         public void Dispose()
         {
             if (_helper!=null)

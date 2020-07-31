@@ -10,6 +10,10 @@ namespace Tester
     /// </summary>
     class TestsLogger:TSHelperLogger
     {
+        private bool _silentMode = false;
+
+        public bool silentMode { set; get; }
+
         List<string> _preamble = new List<string>();
 
         public void AddToPreamble(string toAdd)
@@ -22,18 +26,29 @@ namespace Tester
             _preamble.Clear();
         }
 
+        public void printPreamble()
+        {
+                Console.Clear();
+                foreach (string aString in _preamble)
+                {
+                    Console.WriteLine(aString);
+                }
+        }
+
         public override void Clear()
         {
-            Console.Clear();
-            foreach (string aString in _preamble)
+            if (!silentMode)
             {
-                Console.WriteLine(aString);
+                printPreamble();
             }
         }
 
         public override void WriteLine(string toPrint)
         {
-            Console.WriteLine(toPrint);
+            if (!silentMode)
+            {
+                Console.WriteLine(toPrint);
+            }
         }
 
     }

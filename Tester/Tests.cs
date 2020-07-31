@@ -4,6 +4,7 @@ using System.Text;
 using GeneratorLib;
 using System.IO;
 using System.Threading;
+using TextSearchHelper;
 
 namespace Tester
 {
@@ -17,6 +18,12 @@ namespace Tester
         public int entriesNumberBeforeTest2 = -1;
         public int entriesNumberAfterTest2 = -1;
         public int entriesNumberAfter2Test2 = -1;
+        public TextSearchDisposed disposedException3 = null;
+        public TextSearchDisposed disposedException4 = null;
+        public WaitCacheException waitingException5 = null;
+
+
+
         private TestsLogger logger;
 
         private static bool isEqual(List<Position> positions1, List<Position> positions2)
@@ -41,29 +48,12 @@ namespace Tester
             return true;
         }
 
-        /*
-        private void regenerateFileAndSearcher(bool needRegenerate, string preambleString)
-        {
-            if (needRegenerate)
-            {
-                logger.AddToPreamble(preambleString);
-                logger.AddToPreamble("Generating file and initsialisation of file cache for cached search");
-                Generator.Generate(1000, _Filename, true);
-                if (cached != null)
-                {
-                    cached.Dispose();
-                }
-                cached = new CachedSearcher(_Filename, logger);
-                logger.ResetPreamble();
-            }
-        }*/
-
         public Tests(string Filename = "../huge_file.txt")
         {
             _Filename = Filename;
             logger = new TestsLogger();
         }
-        public void Test1(bool regenerateFile = true)
+        public void Test1(bool regenerateFile = false)
         {
             if (regenerateFile)
             {
@@ -96,8 +86,12 @@ namespace Tester
             }
         }
 
-        public void Test2(bool regenerateFile = true)
+        public void Test2(bool regenerateFile = false)
         {
+            if (regenerateFile)
+            {
+                Generator.Generate(250);
+            }
             logger.ResetPreamble();
             string testProcess = "TEST2 Process...";
             logger.AddToPreamble(testProcess);
@@ -136,7 +130,91 @@ namespace Tester
             }
         }
 
+        public void Test3(bool regenerateFile = false)
+        {
+            if (regenerateFile)
+            {
+                Generator.Generate(250);
+            }
+            logger.ResetPreamble();
+            string testProcess = "TEST3 Process...";
+            logger.AddToPreamble(testProcess);
+            logger.AddToPreamble("Getting DisposedException after cached file renaming");
 
+            using (CachedSearcher cached = new CachedSearcher(_Filename, logger))
+            {
+                try
+                {
+                    File.Move(_Filename, _Filename + "_renamed");
+                    Thread.Sleep(2000);
+                    List<Position> positionsCached = cached.findAll("кошка");
+                }
+                catch (TextSearchDisposed tsd)
+                {
+                    disposedException3 = tsd;
+                }
+            }
+            // Вернули на место переименованный файл
+            File.Move(_Filename + "_renamed", _Filename);
+        }
 
-    }
+        public void Test4(bool regenerateFile = false)
+        {
+            if (regenerateFile)
+            {
+                Generator.Generate(250);
+            }
+            logger.ResetPreamble();
+            string testProcess = "TEST4 Process...";
+            logger.AddToPreamble(testProcess);
+            logger.AddToPreamble("Getting DisposedException after cached file deleting");
+
+            using (CachedSearcher cached = new CachedSearcher(_Filename, logger))
+            {
+                try
+                {
+                    File.Delete(_Filename);
+                    Thread.Sleep(2000);
+                    List<Position> positionsCached = cached.findAll("кошка");
+                }
+                catch (TextSearchDisposed tsd)
+                {
+                    disposedException4 = tsd;
+                }
+            }
+            // Вернули на место удалённый файл
+            Generator.Generate(250);
+        }
+
+        public void Test5(bool regenerateFile = false)
+        {
+            if (regenerateFile)
+            {
+                Generator.Generate(250);
+            }
+            logger.ResetPreamble();
+            string testProcess = "TEST5 Process...";
+            logger.AddToPreamble(testProcess);
+            logger.AddToPreamble("Getting WaitCacheException while cache building");
+
+            using (CachedSearcher cached = new CachedSearcher(_Filename, logger,true))
+            {
+                try
+                {
+                    logger.silentMode = true;
+                    List<Position> positionsCached = cached.findAll("кошка", false);
+                }
+                catch (WaitCacheException wce)
+                {
+                    waitingException5 = wce;
+                }
+                // Ожидаем окончания построения кеша
+                logger.AddToPreamble("Waiting cache will be built");
+                logger.printPreamble();
+                cached.waitCacheBuilt();
+                logger.silentMode = false;
+            }
+        }
+
+        }
 }

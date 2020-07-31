@@ -5,7 +5,7 @@
 
 Пример использования:
 
-*using TextSearchHelper;
+*using TextSearchHelper*;  
 ... 
 File("some_file.txt").WriteAllText(Оооочень большая строка); 
 using (TSHelper _helper = new TSHelper("some_file.txt"))  

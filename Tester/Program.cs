@@ -8,27 +8,6 @@ namespace Tester
 {
     class Program
     {
-        private static  bool isEqual(List<Position> positions1, List<Position> positions2)
-        {
-            if (positions1.Count!=positions2.Count)
-            {
-                return false;
-            }
-
-            for (int i=0;i<positions1.Count;i++)
-            {
-                if (
-                    (positions1[i].StringNumber!=positions2[i].StringNumber)
-                    ||
-                    (positions1[i].LetterNumber != positions2[i].LetterNumber)
-                    )
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
 
         static void Main(string[] args)
         {

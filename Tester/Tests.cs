@@ -8,10 +8,15 @@ using TextSearchHelper;
 
 namespace Tester
 {
+    /// <summary>
+    /// Класс, содержащий ряд тестов библиотеки TextSearchHelper
+    /// </summary>
     class Tests
     {
 
         private string _Filename;
+
+        // Это поля, хранящие результат всех тестов
         public double timeStandardTest1;
         public double timeCachedTest1;
         public bool resultsEqualsTest1;
@@ -21,11 +26,15 @@ namespace Tester
         public TextSearchDisposed disposedException3 = null;
         public TextSearchDisposed disposedException4 = null;
         public WaitCacheException waitingException5 = null;
-
-
-
+        
         private TestsLogger logger;
 
+        /// <summary>
+        /// Метод, сравнивающий два результата поиска. Используется для сравнения результата поиска стандартным способом и поиска, осуществлённого с помощью библиотеки TextSearchHelper
+        /// </summary>
+        /// <param name="positions1"></param>
+        /// <param name="positions2"></param>
+        /// <returns></returns>
         private static bool isEqual(List<Position> positions1, List<Position> positions2)
         {
             if (positions1.Count != positions2.Count)
@@ -53,6 +62,11 @@ namespace Tester
             _Filename = Filename;
             logger = new TestsLogger();
         }
+
+        /// <summary>
+        /// Запускаем поиск одного и того же слова двумя разными способами, затем сравниваем их результаты (должны совпасть) и время, затраченное каждым из способов поиска
+        /// </summary>
+        /// <param name="regenerateFile"></param>
         public void Test1(bool regenerateFile = false)
         {
             if (regenerateFile)
@@ -86,6 +100,12 @@ namespace Tester
             }
         }
 
+        /// <summary>
+        /// Берём файл, ищем в нём строку, которой в нём нет с помощью TSHelper-а, добавляем строку и, не переинициализируя индекс-кеш, выполняем снова поиск. 
+        ///     Поиск должен найти одно вхождение стироки в файл. Затем выполняем процедуру, в результате которой поиск должен найти уже два вхождения строки в файл
+        ///     Таким образом мы проверяем добавление новых строк в индекс-кеш без полного перестроения индекса-кеша
+        /// </summary>
+        /// <param name="regenerateFile"></param>
         public void Test2(bool regenerateFile = false)
         {
             if (regenerateFile)
@@ -99,7 +119,6 @@ namespace Tester
 
             using (CachedSearcher cached = new CachedSearcher(_Filename, logger))
             {
-
 
                 entriesNumberBeforeTest2 = cached.findAll("мыла раму").Count;
                 using (StreamWriter sw = File.AppendText(_Filename))
@@ -130,6 +149,10 @@ namespace Tester
             }
         }
 
+        /// <summary>
+        /// Инициализируем индекс-кеш для целевого файла, а затем этот файл переименовываем, пробуем запустить поиск. Должны получить исключение TextSearchDisposed
+        /// </summary>
+        /// <param name="regenerateFile"></param>
         public void Test3(bool regenerateFile = false)
         {
             if (regenerateFile)
@@ -158,6 +181,10 @@ namespace Tester
             File.Move(_Filename + "_renamed", _Filename);
         }
 
+        /// <summary>
+        ///  Инициализируем индекс-кеш для целевого файла, а затем этот файл удаляем, пробуем запустить поиск. Должны получить исключение TextSearchDisposed
+        /// </summary>
+        /// <param name="regenerateFile"></param>
         public void Test4(bool regenerateFile = false)
         {
             if (regenerateFile)
@@ -186,6 +213,10 @@ namespace Tester
             Generator.Generate(250);
         }
 
+        /// <summary>
+        /// Инициализируем индекс-кеш для файла с асинхронном построением инекса-кеша, вызываем метод поиска. Должны получить WaitCacheException
+        /// </summary>
+        /// <param name="regenerateFile"></param>
         public void Test5(bool regenerateFile = false)
         {
             if (regenerateFile)

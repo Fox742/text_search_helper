@@ -16,9 +16,4 @@ namespace Tester
         public readonly long LetterNumber;
         
     }
-
-    class BaseSearchHelper
-    {
-        
-    }
 }

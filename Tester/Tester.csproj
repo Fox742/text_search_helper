@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Update="BaseSearchHelper.cs" />
+    <Compile Update="Position.cs" />
   </ItemGroup>
 
   <ItemGroup>

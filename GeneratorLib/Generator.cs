@@ -6,8 +6,7 @@ namespace GeneratorLib
 {
     public class Generator
     {
-        //private static long fileSize = 1000;
-        //private static string fileName = "../huge_file.txt";
+
         private static string EnglishFileName = "../GeneratorLib/eng_dict.txt";
         private static string RussianFileName = "../GeneratorLib/rus_dict.txt";
         private static List<Char> Signs = new List<char>();
@@ -130,6 +129,12 @@ namespace GeneratorLib
             return Result;
         }
 
+        /// <summary>
+        /// Функция генерирования файла заданного размера, пориблизительно похожего на естесственный текст
+        /// </summary>
+        /// <param name="fileSize"></param>
+        /// <param name="fileName"></param>
+        /// <param name="printLogs"></param>
         public static void Generate(uint fileSize, string fileName = "../huge_file.txt", bool printLogs = true )
         {
                 // Если файл уже есть - удаляем (он может иметь не тот размер, который нам нужен)
@@ -144,12 +149,14 @@ namespace GeneratorLib
                         FileInfo FI = new FileInfo(fileName);
                         do
                         {
+                            // Получаем новую строку
                             string newString = makeString();
                             sw.WriteLine(newString);
                             stringsGenerated++;
                             
                                 if (stringsGenerated % 10000 == 0)
                                 {
+                                    // Обновляем FileInfo для того чтобы получить текущее значение размера файла
                                     FI.Refresh();
                                     if (printLogs)
                                     {
